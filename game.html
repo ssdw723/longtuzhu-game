@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>龙吐珠 · 生命之树</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            background: url('./assets/bg_main.jpg') center/cover no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .light-particle {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(180, 220, 180, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatSoft 15s infinite ease-in-out;
+        }
+        
+        @keyframes floatSoft {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+            50% { transform: translate(30px, -20px) scale(1.1); opacity: 0.5; }
+        }
+        
+        .particle2 {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(200, 240, 200, 0.2) 0%, transparent 70%);
+            top: 60%;
+            left: 10%;
+            animation-duration: 20s;
+        }
+        
+        .particle3 {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(160, 210, 160, 0.25) 0%, transparent 70%);
+            top: 20%;
+            right: 15%;
+            animation-duration: 12s;
+        }
+        
+        .game-wrapper {
+            width: 1300px;
+            height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .option-left {
+            width: 140px;
+            height: 140px;
+            margin-right: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+            opacity: 0.8;
+            transform: translateX(0);
+        }
+        
+        .option-left:hover {
+            opacity: 1;
+            transform: translateX(-8px) scale(1.05);
+        }
+        
+        .option-left.disabled {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-30px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .option-right {
+            width: 140px;
+            height: 140px;
+            margin-left: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+            opacity: 0.8;
+            transform: translateX(0);
+        }
+        
+        .option-right:hover {
+            opacity: 1;
+            transform: translateX(8px) scale(1.05);
+        }
+        
+        .option-right.disabled {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(30px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .option-icon {
+            width: 110px;
+            height: 110px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 30px rgba(100, 150, 100, 0.15), 
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .option-icon img {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            filter: drop-shadow(0 5px 8px rgba(60, 100, 60, 0.2));
+            transition: all 0.2s ease;
+        }
+        
+        .option-left:hover .option-icon {
+            box-shadow: 0 20px 40px rgba(80, 140, 80, 0.25), 
+                        inset 0 0 0 2px rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .option-right:hover .option-icon {
+            box-shadow: 0 20px 40px rgba(80, 140, 80, 0.25), 
+                        inset 0 0 0 2px rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .option-left:hover .option-icon img,
+        .option-right:hover .option-icon img {
+            transform: scale(1.1);
+        }
+        
+        .plant-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .plant-image-wrapper {
+            width: 320px;
+            height: 320px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .plant-image-container {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 40px rgba(100, 150, 100, 0.2),
+                        inset 0 0 0 2px rgba(255, 255, 255, 0.8);
+            transition: all 0.5s ease;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .plant-image {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 20px rgba(60, 100, 60, 0.2));
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .cycle-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, rgba(200, 240, 200, 0.4), transparent 70%),
+                        linear-gradient(135deg, rgba(180, 220, 180, 0.3), transparent 50%);
+            opacity: 0;
+            transition: opacity 1s ease;
+            pointer-events: none;
+            z-index: 3;
+            mix-blend-mode: soft-light;
+        }
+        
+        .plant-center.cycling .cycle-gradient {
+            opacity: 1;
+            animation: gradientShift 2s infinite alternate;
+        }
+        
+        @keyframes gradientShift {
+            0% { opacity: 0.3; background: radial-gradient(circle at 20% 20%, rgba(200, 240, 200, 0.5), transparent 70%); }
+            50% { opacity: 0.6; background: radial-gradient(circle at 80% 60%, rgba(160, 220, 160, 0.6), transparent 70%); }
+            100% { opacity: 0.3; background: radial-gradient(circle at 40% 80%, rgba(180, 230, 180, 0.5), transparent 70%); }
+        }
+        
+        .plant-center.cycling .plant-image {
+            filter: drop-shadow(0 0 30px rgba(120, 180, 120, 0.6));
+            transform: scale(0.95);
+        }
+        
+        .cycle-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 4;
+        }
+        
+        .cycle-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(150, 200, 150, 0.4);
+            border-radius: 50%;
+            animation: particleFall 2s infinite;
+        }
+        
+        @keyframes particleFall {
+            0% { transform: translateY(-20px) scale(0); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.4; }
+            100% { transform: translateY(340px) scale(1); opacity: 0; }
+        }
+        
+        .node-name {
+            color: #4A6A4A;
+            font-size: 16px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+        
+        .control-bar {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 25px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(100, 150, 100, 0.15),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+            z-index: 20;
+        }
+        
+        .control-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #4A6A4A;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 10px rgba(100, 150, 100, 0.1);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.1);
+            box-shadow: 0 8px 15px rgba(80, 140, 80, 0.2);
+        }
+        
+        .control-btn.disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        
+        .collection-btn {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            width: 55px;
+            height: 55px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #4A6A4A;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(100, 150, 100, 0.15),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+            z-index: 20;
+        }
+        
+        .collection-btn:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+        
+        .collection-panel {
+            position: absolute;
+            top: 110px;
+            right: 40px;
+            width: 320px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 25px;
+            display: none;
+            z-index: 30;
+            box-shadow: 0 20px 40px rgba(100, 150, 100, 0.2),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+        }
+        
+        .collection-panel.show {
+            display: block;
+            animation: panelAppear 0.3s ease;
+        }
+        
+        @keyframes panelAppear {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .collection-title {
+            color: #4A6A4A;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            text-align: center;
+            opacity: 0.7;
+        }
+        
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        
+        .collection-item {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(150, 200, 150, 0.3);
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+        
+        .collection-item img {
+            width: 60%;
+            height: 60%;
+            object-fit: contain;
+            opacity: 0.3;
+            filter: grayscale(1);
+        }
+        
+        .collection-item.unlocked {
+            background: rgba(200, 240, 200, 0.5);
+            border-color: rgba(100, 160, 100, 0.5);
+        }
+        
+        .collection-item.unlocked img {
+            opacity: 1;
+            filter: grayscale(0);
+        }
+        
+        .cycle-progress {
+            width: 200px;
+            height: 4px;
+            background: rgba(150, 200, 150, 0.2);
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .cycle-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #A0D0A0, #C0E0C0, #A0D0A0);
+            border-radius: 2px;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px #C0E0C0;
+        }
+        
+        .plant-center.end .plant-image-container {
+            box-shadow: 0 20px 50px rgba(150, 200, 150, 0.4),
+                        inset 0 0 0 2px rgba(255, 255, 255, 0.9);
+        }
+        
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .plant-image {
+            animation: gentleFloat 4s ease-in-out infinite;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="light-particle" style="top: 20%; left: 15%;"></div>
+    <div class="light-particle particle2"></div>
+    <div class="light-particle particle3"></div>
+    
+    <div class="game-container">
+        <div class="collection-btn" id="collectionBtn">◈</div>
+        <div class="collection-panel" id="collectionPanel">
+            <div class="collection-title">生命旅程 · 收集</div>
+            <div class="collection-grid" id="collectionGrid"></div>
+        </div>
+        
+        <div class="game-wrapper">
+            <div class="option-left" id="optionLeft">
+                <div class="option-icon" id="leftIcon">
+                    <img src="./assets/icon_water.svg" alt="选项" id="leftIconImg">
+                </div>
+            </div>
+            
+            <div class="plant-center" id="plantCenter">
+                <div class="plant-image-wrapper">
+                    <div class="plant-image-container">
+                        <img class="plant-image" id="plantImage" src="./assets/1.png" alt="龙吐珠">
+                        <div class="cycle-gradient" id="cycleGradient"></div>
+                    </div>
+                    <div class="cycle-particles" id="cycleParticles"></div>
+                </div>
+                <div class="node-name" id="nodeName">种子</div>
+                <div class="cycle-progress">
+                    <div class="cycle-progress-fill" id="cycleProgress"></div>
+                </div>
+            </div>
+            
+            <div class="option-right" id="optionRight">
+                <div class="option-icon" id="rightIcon">
+                    <img src="./assets/icon_bird.svg" alt="选项" id="rightIconImg">
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-bar">
+            <div class="control-btn" id="backBtn">←</div>
+            <div class="control-btn" id="resetBtn">↻</div>
+            <div class="control-btn" id="skipBtn">→</div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 修正版 - 所有分支都连通 ====================
+const gameNodes = {
+    // === 起点：种子 ===
+    'seed': {
+        id: 'seed',
+        image: './assets/1.png',
+        name: '种子',
+        leftIcon: './assets/icon_water.svg',
+        rightIcon: './assets/icon_bird.svg',
+        leftNext: 'sprout_water',
+        rightNext: 'bird_choice'
+    },
+    
+    // === 浇水分支 ===
+    'sprout_water': {
+        id: 'sprout_water',
+        image: './assets/2.png',
+        name: '浇水发芽',
+        leftIcon: './assets/icon_sun.svg',
+        rightIcon: './assets/icon_scissors.svg',
+        leftNext: 'sun_grow',
+        rightNext: 'prune_grow'
+    },
+    
+    // 晒太阳节点
+    'sun_grow': {
+        id: 'sun_grow',
+        image: './assets/3.png',
+        name: '晒太阳',
+        leftIcon: './assets/icon_support.svg',
+        rightIcon: './assets/icon_leaf.svg',
+        leftNext: 'support_climb',
+        rightNext: 'leaf_spread'
+    },
+    
+    // 枝叶蔓延节点
+    'leaf_spread': {
+        id: 'leaf_spread',
+        image: './assets/leaf_spread.png',
+        name: '枝叶蔓延',
+        leftIcon: './assets/icon_deer.svg',
+        rightIcon: './assets/icon_spread.svg',
+        leftNext: 'deer_end',
+        rightNext: 'spread_end'
+    },
+    
+    // 修剪枝条节点
+    'prune_grow': {
+        id: 'prune_grow',
+        image: './assets/3.png',
+        name: '修剪枝条',
+        leftIcon: './assets/icon_harvest.svg',
+        rightIcon: './assets/icon_wither.svg',
+        leftNext: 'harvest_end',
+        rightNext: 'wither_path'
+    },
+    
+    // 搭架攀爬节点 - 右侧图标改为 icon_default.svg
+    'support_climb': {
+        id: 'support_climb',
+        image: './assets/support_climb.png',
+        name: '搭架攀爬',
+        leftIcon: './assets/icon_mountain.svg',
+        rightIcon: './assets/icon_default.svg',  // 已修改
+        leftNext: 'mountain_end',
+        rightNext: 'flower_abundance'
+    },
+    
+    // 繁花似锦节点
+    'flower_abundance': {
+        id: 'flower_abundance',
+        image: './assets/5.png',
+        name: '繁花似锦',
+        leftIcon: './assets/icon_tea.svg',
+        rightIcon: './assets/icon_bee.svg',
+        leftNext: 'tea_end',
+        rightNext: 'honey_end'
+    },
+    
+    // === 凋零分支 ===
+    'wither_path': {
+        id: 'wither_path',
+        image: './assets/6.png',
+        name: '开始凋零',
+        leftIcon: './assets/icon_wind.svg',
+        rightIcon: './assets/icon_death.svg',
+        leftNext: 'wind_end',
+        rightNext: 'death_end'
+    },
+    
+    // === 喂鸟分支 ===
+    'bird_choice': {
+        id: 'bird_choice',
+        image: './assets/bird_eat.png',
+        name: '小鸟来了',
+        leftIcon: './assets/icon_poop.svg',
+        rightIcon: './assets/icon_death.svg',
+        leftNext: 'poop_new',
+        rightNext: 'bird_death'
+    },
+    
+    // 排出新种子节点
+    'poop_new': {
+        id: 'poop_new',
+        image: './assets/poop_seed.png',
+        name: '排出新种子',
+        leftIcon: './assets/icon_seed.svg',
+        rightIcon: './assets/icon_water.svg',
+        leftNext: 'sprout_water',
+        rightNext: 'sprout_water'
+    },
+    
+    // === 结局节点 ===
+    'harvest_end': {
+        id: 'harvest_end',
+        image: './assets/1.png',
+        name: '丰收',
+        isEnd: true,
+        endName: '丰收',
+        endIcon: './assets/icon_harvest.svg'
+    },
+    
+    'mountain_end': {
+        id: 'mountain_end',
+        image: './assets/mountain_top.png',
+        name: '登顶',
+        isEnd: true,
+        endName: '登天',
+        endIcon: './assets/icon_mountain.svg'
+    },
+    
+    'deer_end': {
+        id: 'deer_end',
+        image: './assets/deer_eat.png',
+        name: '被鹿吃掉',
+        isEnd: true,
+        endName: '食物链',
+        endIcon: './assets/icon_deer.svg'
+    },
+    
+    'spread_end': {
+        id: 'spread_end',
+        image: './assets/spread_land.png',
+        name: '蔓延大地',
+        isEnd: true,
+        endName: '蔓延',
+        endIcon: './assets/icon_spread.svg'
+    },
+    
+    'wind_end': {
+        id: 'wind_end',
+        image: './assets/wind_blow.png',
+        name: '随风飘散',
+        isEnd: true,
+        endName: '流浪',
+        endIcon: './assets/icon_wind.svg'
+    },
+    
+    'death_end': {
+        id: 'death_end',
+        image: './assets/8.png',
+        name: '枯萎',
+        isEnd: true,
+        endName: '枯萎',
+        endIcon: './assets/icon_death.svg'
+    },
+    
+    'bird_death': {
+        id: 'bird_death',
+        image: './assets/bird_dead.png',
+        name: '小鸟死了',
+        isEnd: true,
+        endName: '意外',
+        endIcon: './assets/icon_death.svg'
+    },
+    
+    'tea_end': {
+        id: 'tea_end',
+        image: './assets/tea_garden.png',
+        name: '品茶',
+        isEnd: true,
+        endName: '品茶',
+        endIcon: './assets/icon_tea.svg'
+    },
+    
+    'honey_end': {
+        id: 'honey_end',
+        image: './assets/bee_honey.png',
+        name: '采蜜',
+        isEnd: true,
+        endName: '采蜜',
+        endIcon: './assets/icon_honey.svg'
+    }
+};
+        
+        let history = [];
+        let currentNode = 'seed';
+        let unlockedEndings = new Set();
+        
+        let cycleTimer = null;
+        let cycleTime = 0;
+        const CYCLE_DURATION = 2000;
+        
+        function initGame() {
+            loadNode('seed');
+            updateCollectionDisplay();
+            createParticles();
+            
+            document.getElementById('optionLeft').addEventListener('click', () => selectOption('left'));
+            document.getElementById('optionRight').addEventListener('click', () => selectOption('right'));
+            document.getElementById('backBtn').addEventListener('click', goBack);
+            document.getElementById('resetBtn').addEventListener('click', resetGame);
+            document.getElementById('skipBtn').addEventListener('click', handleSkip);
+            document.getElementById('collectionBtn').addEventListener('click', toggleCollection);
+        }
+        
+        function createParticles() {
+            const container = document.getElementById('cycleParticles');
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'cycle-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                particle.style.animationDuration = 1 + Math.random() * 2 + 's';
+                particle.style.background = `rgba(150, 200, 150, ${0.2 + Math.random() * 0.3})`;
+                container.appendChild(particle);
+            }
+        }
+        
+        function loadNode(nodeId) {
+            const node = gameNodes[nodeId];
+            if (!node) return;
+            
+            currentNode = nodeId;
+            
+            if (cycleTimer) {
+                clearInterval(cycleTimer);
+                cycleTimer = null;
+                document.getElementById('plantCenter').classList.remove('cycling');
+                document.getElementById('cycleProgress').style.width = '0%';
+            }
+            
+            const plantImg = document.getElementById('plantImage');
+            plantImg.style.opacity = '0';
+            setTimeout(() => {
+                plantImg.src = node.image;
+                plantImg.style.opacity = '1';
+            }, 100);
+            
+            document.getElementById('nodeName').textContent = node.name;
+            
+            const leftIconImg = document.getElementById('leftIconImg');
+            const rightIconImg = document.getElementById('rightIconImg');
+            const leftOption = document.getElementById('optionLeft');
+            const rightOption = document.getElementById('optionRight');
+            
+            if (node.isEnd) {
+                leftOption.classList.add('disabled');
+                rightOption.classList.add('disabled');
+                document.getElementById('plantCenter').classList.add('end');
+                
+                if (node.endName) {
+                    unlockedEndings.add(node.endName);
+                    updateCollectionDisplay();
+                }
+                
+                startCycleTransition();
+                
+            } else {
+                leftIconImg.src = node.leftIcon || './assets/icon_default.svg';
+                rightIconImg.src = node.rightIcon || './assets/icon_default.svg';
+                leftOption.classList.remove('disabled');
+                rightOption.classList.remove('disabled');
+                document.getElementById('plantCenter').classList.remove('end');
+            }
+            
+            if (history[history.length - 1] !== nodeId) {
+                history.push(nodeId);
+            }
+            
+            updateBackButton();
+        }
+        
+        function startCycleTransition() {
+            cycleTime = 0;
+            const progressBar = document.getElementById('cycleProgress');
+            const plantCenter = document.getElementById('plantCenter');
+            
+            plantCenter.classList.add('cycling');
+            
+            cycleTimer = setInterval(() => {
+                cycleTime += 50;
+                const progress = (cycleTime / CYCLE_DURATION) * 100;
+                progressBar.style.width = progress + '%';
+                
+                if (cycleTime >= CYCLE_DURATION) {
+                    clearInterval(cycleTimer);
+                    cycleTimer = null;
+                    
+                    plantCenter.classList.remove('cycling');
+                    progressBar.style.width = '0%';
+                    
+                    const plantImg = document.getElementById('plantImage');
+                    plantImg.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        resetGame();
+                        plantImg.style.opacity = '1';
+                    }, 200);
+                }
+            }, 50);
+        }
+        
+        function selectOption(side) {
+            const node = gameNodes[currentNode];
+            if (!node || node.isEnd) return;
+            
+            if (cycleTimer) {
+                clearInterval(cycleTimer);
+                cycleTimer = null;
+                document.getElementById('plantCenter').classList.remove('cycling');
+                document.getElementById('cycleProgress').style.width = '0%';
+            }
+            
+            const nextNodeId = side === 'left' ? node.leftNext : node.rightNext;
+            if (nextNodeId && gameNodes[nextNodeId]) {
+                loadNode(nextNodeId);
+            }
+        }
+        
+        function goBack() {
+            if (history.length > 1) {
+                if (cycleTimer) {
+                    clearInterval(cycleTimer);
+                    cycleTimer = null;
+                    document.getElementById('plantCenter').classList.remove('cycling');
+                    document.getElementById('cycleProgress').style.width = '0%';
+                }
+                
+                history.pop();
+                const prevNode = history[history.length - 1];
+                loadNode(prevNode);
+            }
+        }
+        
+        function resetGame() {
+            if (cycleTimer) {
+                clearInterval(cycleTimer);
+                cycleTimer = null;
+                document.getElementById('plantCenter').classList.remove('cycling');
+                document.getElementById('cycleProgress').style.width = '0%';
+            }
+            
+            history = [];
+            loadNode('seed');
+        }
+        
+        function handleSkip() {
+            if (cycleTimer) {
+                clearInterval(cycleTimer);
+                cycleTimer = null;
+                document.getElementById('plantCenter').classList.remove('cycling');
+                document.getElementById('cycleProgress').style.width = '0%';
+            }
+            
+            let current = currentNode;
+            let count = 0;
+            const maxSteps = 10;
+            
+            while (!gameNodes[current].isEnd && count < maxSteps) {
+                const node = gameNodes[current];
+                const random = Math.random() < 0.5 ? 'left' : 'right';
+                const next = random === 'left' ? node.leftNext : node.rightNext;
+                if (next && gameNodes[next]) {
+                    current = next;
+                    count++;
+                } else {
+                    break;
+                }
+            }
+            
+            if (count > 0 && gameNodes[current]) {
+                loadNode(current);
+            }
+        }
+        
+        function updateBackButton() {
+            const backBtn = document.getElementById('backBtn');
+            if (history.length <= 1) {
+                backBtn.classList.add('disabled');
+            } else {
+                backBtn.classList.remove('disabled');
+            }
+        }
+        
+        function toggleCollection() {
+            document.getElementById('collectionPanel').classList.toggle('show');
+        }
+        
+        function updateCollectionDisplay() {
+            const grid = document.getElementById('collectionGrid');
+            const endings = [
+                '丰收', '登天', '食物链', '蔓延',
+                '流浪', '枯萎', '意外', '品茶',
+                '采蜜'
+            ];
+            
+            let html = '';
+            endings.forEach(end => {
+                const unlocked = unlockedEndings.has(end);
+                html += `<div class="collection-item ${unlocked ? 'unlocked' : ''}">
+                    <img src="./assets/icon_${unlocked ? 'unlocked' : 'locked'}.svg" alt="">
+                </div>`;
+            });
+            
+            grid.innerHTML = html;
+        }
+        
+        window.onload = initGame;
+    </script>
+</body>
+</html>
